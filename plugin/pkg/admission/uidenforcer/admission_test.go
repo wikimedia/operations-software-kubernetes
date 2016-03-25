@@ -23,7 +23,7 @@ import (
 	"k8s.io/kubernetes/pkg/admission"
 	"k8s.io/kubernetes/pkg/api"
 	"k8s.io/kubernetes/pkg/auth/user"
-	"k8s.io/kubernetes/pkg/client/unversioned/testclient"
+	"k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset/fake"
 )
 
 func validPod(name string, numContainers int) api.Pod {
@@ -40,18 +40,18 @@ func validPod(name string, numContainers int) api.Pod {
 }
 
 func TestFailWithNoUserInfo(t *testing.T) {
-	client := testclient.NewSimpleFake()
+	client := fake.NewSimpleClientset()
 
 	enforcer := NewUidEnforcer(client)
 	testPod := validPod("test", 2)
-	err := enforcer.Admit(admission.NewAttributesRecord(&testPod, "Pod", "test", "testPod", "pods", "", admission.Update, nil))
+	err := enforcer.Admit(admission.NewAttributesRecord(&testPod, api.Kind("Pod"), "test", "testPod", api.Resource("pods"), "", admission.Update, nil))
 	if err == nil {
 		t.Errorf("Expected an error since the pod did not specify resource limits in its update call")
 	}
 }
 
 func TestPodWithUID(t *testing.T) {
-	client := testclient.NewSimpleFake()
+	client := fake.NewSimpleClientset()
 
 	enforcer := NewUidEnforcer(client)
 	testPod := validPod("test", 2)
@@ -61,7 +61,7 @@ func TestPodWithUID(t *testing.T) {
 		Groups: nil,
 	}
 
-	err := enforcer.Admit(admission.NewAttributesRecord(&testPod, "Pod", "test", "testPod", "pods", "", admission.Update, userInfo))
+	err := enforcer.Admit(admission.NewAttributesRecord(&testPod, api.Kind("Pod"), "test", "testPod", api.Resource("pods"), "", admission.Update, userInfo))
 	if err != nil {
 		t.Errorf("%+v", err)
 	}
