@@ -23,11 +23,11 @@ import (
 	"k8s.io/kubernetes/pkg/admission"
 	"k8s.io/kubernetes/pkg/api"
 	apierrors "k8s.io/kubernetes/pkg/api/errors"
-	client "k8s.io/kubernetes/pkg/client/unversioned"
+	clientset "k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset"
 )
 
 func init() {
-	admission.RegisterPlugin("UidEnforcer", func(client client.Interface, config io.Reader) (admission.Interface, error) {
+	admission.RegisterPlugin("UidEnforcer", func(client clientset.Interface, config io.Reader) (admission.Interface, error) {
 		return NewUidEnforcer(client), nil
 	})
 }
@@ -35,11 +35,11 @@ func init() {
 // plugin contains the client used by the uidenforcer admin controller
 type plugin struct {
 	*admission.Handler
-	client client.Interface
+	client clientset.Interface
 }
 
 // NewSecurityContextDeny creates a new instance of the SecurityContextDeny admission controller
-func NewUidEnforcer(client client.Interface) admission.Interface {
+func NewUidEnforcer(client clientset.Interface) admission.Interface {
 	return &plugin{
 		Handler: admission.NewHandler(admission.Create, admission.Update),
 		client:  client,
@@ -48,7 +48,7 @@ func NewUidEnforcer(client client.Interface) admission.Interface {
 
 // Admit will deny pods that have a RunAsUser set that isn't the uid of the user requesting it
 func (p *plugin) Admit(a admission.Attributes) (err error) {
-	if a.GetResource() != string(api.ResourcePods) {
+	if a.GetResource() != api.Resource("Pods") {
 		return nil
 	}
 
