@@ -48,7 +48,7 @@ func NewUidEnforcer(client clientset.Interface) admission.Interface {
 
 // Admit will deny pods that have a RunAsUser set that isn't the uid of the user requesting it
 func (p *plugin) Admit(a admission.Attributes) (err error) {
-	if a.GetResource() != api.Resource("Pods") {
+	if a.GetResource() != api.Resource("pods") {
 		return nil
 	}
 
