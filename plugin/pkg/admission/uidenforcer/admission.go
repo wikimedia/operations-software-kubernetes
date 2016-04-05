@@ -106,12 +106,9 @@ func (p *plugin) Admit(a admission.Attributes) (err error) {
 		container := &pod.Spec.Containers[i]
 		uid, ok := strconv.ParseInt(namespace.Annotations["RunAsUser"], 10, 32)
 		if ok == nil {
-			if container.SecurityContext == nil {
-				container.SecurityContext = &api.SecurityContext{
-					RunAsUser: &uid,
-				}
-			} else {
-				return apierrors.NewBadRequest("Must have an empty SecuriyContext to pass!")
+			// Set the SecurityContext to just ours, no matter what
+			container.SecurityContext = &api.SecurityContext{
+				RunAsUser: &uid,
 			}
 		} else {
 			return apierrors.NewBadRequest("Namespace's RunAsUser not an integer")
