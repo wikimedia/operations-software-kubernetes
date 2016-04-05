@@ -22,7 +22,7 @@ import (
 
 	"k8s.io/kubernetes/pkg/admission"
 	"k8s.io/kubernetes/pkg/api"
-	"k8s.io/kubernetes/pkg/auth/user"
+	"k8s.io/kubernetes/pkg/client/cache"
 	"k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset/fake"
 )
 
@@ -39,36 +39,57 @@ func validPod(name string, numContainers int) api.Pod {
 	return pod
 }
 
-func TestFailWithNoUserInfo(t *testing.T) {
-	client := fake.NewSimpleClientset()
-
-	enforcer := NewUidEnforcer(client)
+func TestNoRunUser(t *testing.T) {
+	clientset := fake.NewSimpleClientset()
+	store := cache.NewStore(cache.MetaNamespaceKeyFunc)
 	testPod := validPod("test", 2)
-	err := enforcer.Admit(admission.NewAttributesRecord(&testPod, api.Kind("Pod"), "test", "testPod", api.Resource("pods"), "", admission.Update, nil))
+
+	namespace := &api.Namespace{
+		ObjectMeta: api.ObjectMeta{
+			Name: testPod.Namespace,
+		},
+	}
+	store.Add(namespace)
+
+	handler := &plugin{
+		clientset: clientset,
+		store:     store,
+	}
+
+	err := handler.Admit(admission.NewAttributesRecord(&testPod, api.Kind("Pod"), testPod.Namespace, testPod.Name, api.Resource("pods"), "", admission.Update, nil))
 	if err == nil {
-		t.Errorf("Expected an error since the pod did not specify resource limits in its update call")
+		t.Errorf("Expected admission to fail but it passed!")
 	}
 }
 
 func TestPodWithUID(t *testing.T) {
-	client := fake.NewSimpleClientset()
-
-	enforcer := NewUidEnforcer(client)
+	clientset := fake.NewSimpleClientset()
+	store := cache.NewStore(cache.MetaNamespaceKeyFunc)
 	testPod := validPod("test", 2)
-	userInfo := &user.DefaultInfo{
-		Name:   "test",
-		UID:    "50",
-		Groups: nil,
+
+	namespace := &api.Namespace{
+		ObjectMeta: api.ObjectMeta{
+			Name: testPod.Namespace,
+			Annotations: map[string]string{
+				"RunAsUser": "100",
+			},
+		},
+	}
+	store.Add(namespace)
+
+	handler := &plugin{
+		clientset: clientset,
+		store:     store,
 	}
 
-	err := enforcer.Admit(admission.NewAttributesRecord(&testPod, api.Kind("Pod"), "test", "testPod", api.Resource("pods"), "", admission.Update, userInfo))
+	err := handler.Admit(admission.NewAttributesRecord(&testPod, api.Kind("Pod"), testPod.Namespace, testPod.Name, api.Resource("pods"), "", admission.Update, nil))
 	if err != nil {
 		t.Errorf("%+v", err)
 	}
 
 	for _, v := range testPod.Spec.Containers {
 		if v.SecurityContext != nil {
-			if *v.SecurityContext.RunAsUser != 50 {
+			if *v.SecurityContext.RunAsUser != 100 {
 				t.Errorf("WTF!")
 			}
 		} else {
