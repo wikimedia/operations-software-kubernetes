@@ -126,6 +126,7 @@ enable-swagger-ui
 enable-garbage-collector
 etcd-cafile
 etcd-certfile
+enforced-docker-registry
 etcd-config
 etcd-keyfile
 etcd-mutation-timeout
