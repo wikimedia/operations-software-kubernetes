@@ -34,6 +34,7 @@ import (
 	_ "k8s.io/kubernetes/plugin/pkg/admission/namespace/exists"
 	_ "k8s.io/kubernetes/plugin/pkg/admission/namespace/lifecycle"
 	_ "k8s.io/kubernetes/plugin/pkg/admission/persistentvolume/label"
+	_ "k8s.io/kubernetes/plugin/pkg/admission/registryenforcer"
 	_ "k8s.io/kubernetes/plugin/pkg/admission/resourcequota"
 	_ "k8s.io/kubernetes/plugin/pkg/admission/securitycontext/scdeny"
 	_ "k8s.io/kubernetes/plugin/pkg/admission/serviceaccount"

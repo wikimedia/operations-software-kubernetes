@@ -97,6 +97,7 @@ enable-custom-metrics
 enable-debugging-handlers
 enable-hostpath-provisioner
 enable-server
+enforced-docker-registry
 etcd-config
 etcd-mutation-timeout
 etcd-prefix
