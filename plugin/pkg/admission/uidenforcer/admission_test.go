@@ -87,6 +87,18 @@ func TestPodWithUID(t *testing.T) {
 		t.Errorf("%+v", err)
 	}
 
+	if testPod.Spec.SecurityContext == nil {
+		t.Errorf("Pod Security Context is unexpectedly nil")
+	}
+
+	if *testPod.Spec.SecurityContext.RunAsUser != 100 {
+		t.Errorf("Pod Security Context doesn't have RunAsUser set")
+	}
+
+	if *testPod.Spec.SecurityContext.FSGroup != 100 {
+		t.Errorf("Pod Security Context doesn't have FSGroup set")
+	}
+
 	for _, v := range testPod.Spec.Containers {
 		if v.SecurityContext != nil {
 			if *v.SecurityContext.RunAsUser != 100 {

@@ -98,20 +98,27 @@ func (p *plugin) Admit(a admission.Attributes) (err error) {
 	}
 	namespace := namespaceObj.(*api.Namespace)
 
-	if _, ok := namespace.Annotations["RunAsUser"]; !ok {
+	uid_str, uid_exists := namespace.Annotations["RunAsUser"]
+	if !uid_exists {
 		return apierrors.NewBadRequest("Namespace does not have a RunAsUser annotation!")
+	}
+
+	// Set PodSecurityContext
+	uid, uid_ok := strconv.ParseInt(uid_str, 10, 32)
+	if uid_ok != nil {
+		return apierrors.NewBadRequest("Namespace's RunAsUser not an integer")
+	}
+
+	pod.Spec.SecurityContext = &api.PodSecurityContext{
+		RunAsUser: &uid,
+		FSGroup:   &uid,
 	}
 
 	for i := 0; i < len(pod.Spec.Containers); i++ {
 		container := &pod.Spec.Containers[i]
-		uid, ok := strconv.ParseInt(namespace.Annotations["RunAsUser"], 10, 32)
-		if ok == nil {
-			// Set the SecurityContext to just ours, no matter what
-			container.SecurityContext = &api.SecurityContext{
-				RunAsUser: &uid,
-			}
-		} else {
-			return apierrors.NewBadRequest("Namespace's RunAsUser not an integer")
+		// Set the SecurityContext to just ours, no matter what
+		container.SecurityContext = &api.SecurityContext{
+			RunAsUser: &uid,
 		}
 	}
 	return nil
