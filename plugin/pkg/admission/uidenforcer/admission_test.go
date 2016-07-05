@@ -56,7 +56,7 @@ func TestNoRunUser(t *testing.T) {
 		store:     store,
 	}
 
-	err := handler.Admit(admission.NewAttributesRecord(&testPod, api.Kind("Pod"), testPod.Namespace, testPod.Name, api.Resource("pods"), "", admission.Update, nil))
+	err := handler.Admit(admission.NewAttributesRecord(&testPod, nil, api.Kind("Pod").WithVersion("version"), testPod.Namespace, testPod.Name, api.Resource("pods").WithVersion("version"), "", admission.Update, nil))
 	if err == nil {
 		t.Errorf("Expected admission to fail but it passed!")
 	}
@@ -82,7 +82,7 @@ func TestPodWithUID(t *testing.T) {
 		store:     store,
 	}
 
-	err := handler.Admit(admission.NewAttributesRecord(&testPod, api.Kind("Pod"), testPod.Namespace, testPod.Name, api.Resource("pods"), "", admission.Update, nil))
+	err := handler.Admit(admission.NewAttributesRecord(&testPod, nil, api.Kind("Pod").WithVersion("version"), testPod.Namespace, testPod.Name, api.Resource("pods").WithVersion("version"), "", admission.Update, nil))
 	if err != nil {
 		t.Errorf("%+v", err)
 	}
