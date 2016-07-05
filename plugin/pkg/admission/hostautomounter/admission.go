@@ -66,7 +66,7 @@ func NewHostAutomounter(cl clientset.Interface, mounts sets.String) *hostAutomou
 // 4. Make sure all the volumes are mounted on all the
 //    containers
 func (s *hostAutomounter) Admit(a admission.Attributes) (err error) {
-	if a.GetResource() != api.Resource("pods") {
+	if a.GetResource().GroupResource() != api.Resource("pods") {
 		return nil
 	}
 	obj := a.GetObject()

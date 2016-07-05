@@ -73,7 +73,7 @@ func NewUidEnforcer(clientset clientset.Interface) admission.Interface {
 //
 // If after all this there's no SecurityContext on each Container with a RunAsUser set to the same RunAsUser, it'll be set
 func (p *plugin) Admit(a admission.Attributes) (err error) {
-	if a.GetResource() != api.Resource("pods") {
+	if a.GetResource().GroupResource() != api.Resource("pods") {
 		return nil
 	}
 

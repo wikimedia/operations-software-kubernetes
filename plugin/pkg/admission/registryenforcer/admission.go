@@ -59,7 +59,7 @@ func (p *plugin) Admit(a admission.Attributes) (err error) {
 		return apierrors.NewBadRequest("registryenforcer enabled but --enforced-docker-registry not set")
 	}
 
-	if a.GetResource() != api.Resource("pods") {
+	if a.GetResource().GroupResource() != api.Resource("pods") {
 		return nil
 	}
 
