@@ -53,7 +53,7 @@ func TestUnauthorizedVolume(t *testing.T) {
 
 	handler := NewHostPathEnforcer(clientset, allowedPaths, allowedPrefixes)
 
-	err := handler.Admit(admission.NewAttributesRecord(&testPod, api.Kind("Pod"), testPod.Namespace, testPod.Name, api.Resource("pods"), "", admission.Create, nil))
+	err := handler.Admit(admission.NewAttributesRecord(&testPod, nil, api.Kind("Pod").WithVersion("version"), testPod.Namespace, testPod.Name, api.Resource("pods").WithVersion("version"), "", admission.Create, nil))
 	if err == nil {
 		t.Errorf("Expected admission to fail but it passed!")
 	}

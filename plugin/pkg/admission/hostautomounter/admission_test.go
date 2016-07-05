@@ -44,7 +44,7 @@ func TestEmptyPod(t *testing.T) {
 	mounts := sets.NewString("/var/run/nslcd/socket", "/var/run/nscd/socket")
 	handler := NewHostAutomounter(clientset, mounts)
 
-	err := handler.Admit(admission.NewAttributesRecord(&testPod, api.Kind("Pod"), testPod.Namespace, testPod.Name, api.Resource("pods"), "", admission.Create, nil))
+	err := handler.Admit(admission.NewAttributesRecord(&testPod, nil, api.Kind("Pod").WithVersion("version"), testPod.Namespace, testPod.Name, api.Resource("pods").WithVersion("version"), "", admission.Create, nil))
 	if err != nil {
 		t.Errorf("Expected admission to pass but it failed!")
 	}
