@@ -66,7 +66,7 @@ func NewHostPathEnforcer(cl clientset.Interface, pathsAllowedSet sets.String, pa
 // bindmounts, etc) but attacks against those require you have control of the
 // node already anyway.
 func (s *plugin) Admit(a admission.Attributes) (err error) {
-	if a.GetResource() != api.Resource("pods") {
+	if a.GetResource().GroupResource() != api.Resource("pods") {
 		return nil
 	}
 	obj := a.GetObject()
